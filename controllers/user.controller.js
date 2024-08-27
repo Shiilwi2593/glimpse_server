@@ -1,6 +1,10 @@
 const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+
 
 exports.registerUser = async (req, res) => {
     const { username, email, password } = req.body;
@@ -142,3 +146,37 @@ exports.updateLocation = async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 }
+
+exports.sendOTP = async (req, res) => {
+    const { email } = req.body; // Địa chỉ email của người nhận
+
+    if (!email) {
+        return res.status(400).json({ success: false, message: 'No email provided' });
+    }
+
+    try {
+        const otp = crypto.randomInt(100000, 999999); // OTP 6 chữ số
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER, // Địa chỉ email của bạn
+            to: email, // Địa chỉ email người nhận
+            subject: 'Glimpse OTP',
+            text: `Your OTP code is ${otp}. It is valid for 10 minutes.`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ success: true, otp }); // Gửi OTP về client
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ success: false, message: 'Failed to send OTP' });
+    }
+};
