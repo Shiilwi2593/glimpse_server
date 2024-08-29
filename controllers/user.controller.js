@@ -67,7 +67,12 @@ exports.login = async (req, res) => {
 }
 
 exports.getUserInfoByToken = async (req, res) => {
-    const { token } = req.body;
+    const token = req.params.token; 
+
+    if (!token) {
+        return res.status(401).json({ msg: 'No token provided' });
+    }
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id;
