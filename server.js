@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose')
 const app = express();
 const userRoutes = require('./routes/user.routes');
+const friendRequestRoutes = require('./routes/friendRequest.routes')
 const port = 3000;
 app.use(express.json());
 
@@ -47,5 +48,6 @@ mongoose.connect("mongodb+srv://graylwi2593:Gray2592003@glimpse.cl9pe.mongodb.ne
     
 
 app.use('/api/users', userRoutes);
+app.use('/api/friend', friendRequestRoutes);
 
 //this is new

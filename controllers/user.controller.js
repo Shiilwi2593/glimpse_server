@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const { error } = require('console');
+const { json } = require('express');
 
 
 
@@ -185,3 +187,71 @@ exports.sendOTP = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to send OTP' });
     }
 };
+
+exports.addToFriendList = async(req, res) => {
+    const {token , friendId} = req.body;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id
+
+        const user = await User.findById(userId)
+        const friend = await User.findById(friendId)
+        if(!user){
+            return res.status(404).json({message: error.message});
+        }
+        //add to my list
+        user.friends.push(friendId)
+        await user.save();
+
+        //add to fr list
+        friend.friends.push(user.id)
+        await user.save();
+
+        res.status(200).json({success: true, message: 'Friend added'});
+    } catch (error) {
+        res.status(500).json({message: error.message})
+    }
+}
+
+exports.removeFromFriendList = async(req, res) =>{
+    const {token, friendId} = req.body;
+
+    try {
+        //Get userid from token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userID = decoded.user.id;
+
+        const user = await User.findById(userID);
+        const friend = await User.findById(friendId);
+
+
+        //remove fr from my account
+        user.friends.pop(friendId);
+        await user.save();
+
+        //remove my acc from friend list
+        friend.friends.pop(userID);
+        await user.save();
+
+        res.status(200).json({success: true, message: 'Friend removed'});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
+exports.getFriendList = async(req, res) => {
+    const {token} = req.body;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userID = decoded.user.id;
+        
+        const user = await User.findById(userID).populate('friends', '_id username email image');
+
+        res.status(200).json({success: true, friends: user.friends});
+
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
