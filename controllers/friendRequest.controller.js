@@ -7,8 +7,8 @@ const bcrypt = require('bcryptjs');
 // const { error } = require('console');
 // const { json } = require('express');
 
-exports.sendFriendRequest = async(req, res) => {
-    const {token, receiverId} = req.body;
+exports.sendFriendRequest = async (req, res) => {
+    const { token, receiverId } = req.body;
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const senderId = decoded.user.id;
@@ -22,31 +22,50 @@ exports.sendFriendRequest = async(req, res) => {
         });
         await friendRequest.save();
 
-        res.status(200).json({success: true, message: 'friend request sent successfully', friendRequest});
+        res.status(200).json({ friendRequest });
 
     } catch (error) {
-        res.status(404).json({message: error.message});
+        res.status(404).json({ message: error.message });
     }
 }
 
 
 exports.getFriendRequest = async (req, res) => {
-    const { token } = req.body;
+    const { token } = req.query;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id;
 
-        // Tìm tất cả các yêu cầu kết bạn mà người dùng là người nhận
         const friendRequests = await FriendRequest.find({
             receiverId: userId
         }).populate('senderId', 'email username')
-        .populate('receiverId', 'email username')
- 
+            .populate('receiverId', 'email username')
 
-        res.status(200).json({ success: true, friendRequests });
+
+        res.status(200).json({ friendRequests });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ message: error.message });
     }
 };
+
+exports.deleteFriendRequest = async (req, res) => {
+    const { id } = req.query;
+    try {
+        const friendRequest = await FriendRequest.findById(id)
+
+        if(!friendRequest){
+            return res.status(404).json({message: 'friend request not found'});
+        }
+
+        await FriendRequest.findByIdAndDelete(id);
+        return res.status(200).json({message: 'Friend request deleted'});
+
+    } catch (error) {
+        res.status(500).json({ message: error.message }); 
+    }
+};
+
+
+

@@ -91,6 +91,54 @@ exports.getUserInfoByToken = async (req, res) => {
     }
 }
 
+exports.getUserInfoById = async(req, res) => {
+    const {id} = req.query
+
+    if(!id){
+        return res.status(401).json({msg: "No id provided"});
+    }
+    
+    const user = await User.findById(id).select('-password');
+    if(!user){
+        return res.status(404).json({msg: "user not found"});
+    }
+    res.status(200).json({user})
+
+    try {
+        
+    } catch (error) {
+        res.status(400).json({message: error.message})
+    }
+}
+
+exports.getUserInfoByUsernameOrEmail = async (req, res) => {
+    const { keyword } = req.query;
+
+    if (!keyword) {
+        return res.status(401).json({ msg: "No keyword provided" });
+    }
+
+    try {
+        const regex = new RegExp(keyword, 'i');
+
+        const users = await User.find({
+            $or: [
+                { username: { $regex: regex } },
+                { email: { $regex: regex } }
+            ]
+        });
+
+        if (users.length === 0) {
+            return res.status(404).json({ msg: "No users found" });
+        }
+
+        res.status(200).json({ users });
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
+
 exports.checkEmail = async (req, res) => {
     const { email } = req.body;
     try {
@@ -240,7 +288,7 @@ exports.removeFromFriendList = async(req, res) =>{
 }
 
 exports.getFriendList = async(req, res) => {
-    const {token} = req.body;
+    const {token} = req.query;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -248,10 +296,28 @@ exports.getFriendList = async(req, res) => {
         
         const user = await User.findById(userID).populate('friends', '_id username email image');
 
-        res.status(200).json({success: true, friends: user.friends});
+        res.status(200).json({friends: user.friends});
 
     } catch (error) {
         res.status(500).json({message: error.message});
     }
 }
 
+exports.isFriend = async (req, res) => {
+    const {token, friendId} = req.body;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const userId = decoded.user.id;
+
+        const user = await User.findById(userId)
+        if(!user){
+            res.status(404).json({msg: 'user not found'});
+        }
+        
+        const isFriend = user.friends.includes(friendId);
+        res.status(200).json({isFriend})
+        
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
