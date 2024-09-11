@@ -237,23 +237,16 @@ exports.sendOTP = async (req, res) => {
 };
 
 exports.addToFriendList = async(req, res) => {
-    const {token , friendId} = req.body;
+    const {id1, id2} = req.body
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.user.id
+        const user1 = await User.findById(id1)
+        const user2 = await User.findById(id2)
 
-        const user = await User.findById(userId)
-        const friend = await User.findById(friendId)
-        if(!user){
-            return res.status(404).json({message: error.message});
-        }
         //add to my list
-        user.friends.push(friendId)
-        await user.save();
-
-        //add to fr list
-        friend.friends.push(user.id)
-        await user.save();
+        user1.friends.push(user2)
+        await user1.save();
+        user2.friends.push(user1)
+        await user2.save();
 
         res.status(200).json({success: true, message: 'Friend added'});
     } catch (error) {

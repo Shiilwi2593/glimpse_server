@@ -50,6 +50,25 @@ exports.getFriendRequest = async (req, res) => {
     }
 };
 
+exports.isPending = async (req, res) => {
+    const {token, receiverId} = req.body
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id
+
+        const friendRequest = await FriendRequest.find({
+            senderId: userId,
+            receiverId: receiverId
+        }).populate('senderId', 'email username')
+        .populate('receiverId', 'email username')
+        res.status(200).json({friendRequest});
+
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
+
 exports.deleteFriendRequest = async (req, res) => {
     const { id } = req.query;
     try {
