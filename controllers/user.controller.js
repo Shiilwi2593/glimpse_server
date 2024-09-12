@@ -17,8 +17,8 @@ exports.registerUser = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Email already exists' })
         }
 
-        user = await User.findOne({username});
-        if(user){
+        user = await User.findOne({ username });
+        if (user) {
             return res.status(400).json({ success: false, message: 'Username already exists' });
         }
 
@@ -69,7 +69,7 @@ exports.login = async (req, res) => {
 }
 
 exports.getUserInfoByToken = async (req, res) => {
-    const token = req.params.token; 
+    const token = req.params.token;
 
     if (!token) {
         return res.status(401).json({ msg: 'No token provided' });
@@ -91,23 +91,21 @@ exports.getUserInfoByToken = async (req, res) => {
     }
 }
 
-exports.getUserInfoById = async(req, res) => {
-    const {id} = req.query
+exports.getUserInfoById = async (req, res) => {
+    const { id } = req.query
 
-    if(!id){
-        return res.status(401).json({msg: "No id provided"});
+    if (!id) {
+        return res.status(401).json({ msg: "No id provided" });
     }
-    
-    const user = await User.findById(id).select('-password');
-    if(!user){
-        return res.status(404).json({msg: "user not found"});
-    }
-    res.status(200).json({user})
-
     try {
-        
+        const user = await User.findById(id).select('-password');
+        if (!user) {
+            return res.status(404).json({ msg: "user not found" });
+        }
+        res.status(200).json(user)
+
     } catch (error) {
-        res.status(400).json({message: error.message})
+        res.status(400).json({ message: error.message })
     }
 }
 
@@ -155,17 +153,17 @@ exports.checkEmail = async (req, res) => {
 
 
 
-exports.checkUsername = async(req, res) => {
-    const {username} = req.body;
-    try{
-        const user = await User.findOne({username});
+exports.checkUsername = async (req, res) => {
+    const { username } = req.body;
+    try {
+        const user = await User.findOne({ username });
         if (user) {
             return res.status(200).json({ exists: true, msg: 'Username already exists' })
         } else {
             return res.status(200).json({ exists: false, msg: 'Username is available' });
         }
-    }catch(error){
-        res.status(500).json({message: error.message});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -202,6 +200,41 @@ exports.updateLocation = async (req, res) => {
     }
 }
 
+exports.fetchFriendsLocation = async (req, res) => {
+    const { token } = req.query;
+
+    try {
+        // Giải mã token để lấy ID người dùng
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id;
+
+        // Tìm người dùng và lấy danh sách bạn bè cùng với thông tin vị trí
+        const user = await User.findById(userId).populate({
+            path: 'friends', 
+            select: '_id location.latitude location.longitude location.updateAt'
+        });
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Lấy danh sách bạn bè và chỉ trả về thông tin vị trí
+        const friendsLocation = user.friends.map(friend => ({
+            _id: friend._id,
+            latitude: friend.location.latitude,
+            longitude: friend.location.longitude,
+            updateAt: friend.location.updateAt
+        }));
+
+        res.status(200).json({ friends: friendsLocation });
+
+    } catch (error) {
+        console.error('Error fetching friends location:', error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
 exports.sendOTP = async (req, res) => {
     const { email } = req.body; // Địa chỉ email của người nhận
 
@@ -236,8 +269,8 @@ exports.sendOTP = async (req, res) => {
     }
 };
 
-exports.addToFriendList = async(req, res) => {
-    const {id1, id2} = req.body
+exports.addToFriendList = async (req, res) => {
+    const { id1, id2 } = req.body
     try {
         const user1 = await User.findById(id1)
         const user2 = await User.findById(id2)
@@ -248,14 +281,15 @@ exports.addToFriendList = async(req, res) => {
         user2.friends.push(user1)
         await user2.save();
 
-        res.status(200).json({success: true, message: 'Friend added'});
+
+        res.status(200).json({ success: true, message: 'Friend added' });
     } catch (error) {
-        res.status(500).json({message: error.message})
+        res.status(500).json({ message: error.message })
     }
 }
 
-exports.removeFromFriendList = async(req, res) =>{
-    const {token, friendId} = req.body;
+exports.removeFromFriendList = async (req, res) => {
+    const { token, friendId } = req.body;
 
     try {
         //Get userid from token
@@ -274,42 +308,54 @@ exports.removeFromFriendList = async(req, res) =>{
         friend.friends.pop(userID);
         await user.save();
 
-        res.status(200).json({success: true, message: 'Friend removed'});
+        res.status(200).json({ success: true, message: 'Friend removed' });
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
-exports.getFriendList = async(req, res) => {
-    const {token} = req.query;
+exports.getFriendList = async (req, res) => {
+    const { token } = req.query;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userID = decoded.user.id;
-        
+
         const user = await User.findById(userID).populate('friends', '_id username email image');
 
-        res.status(200).json({friends: user.friends});
+        res.status(200).json({ friends: user.friends });
 
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
+    }
+}
+
+exports.getOrtherFriendList = async (req, res) => {
+    const { id } = req.query
+
+    try {
+        const user = await User.findById(id).populate('friends', '_id username email image');
+        res.status(200).json({ friends: user.friends });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
 
 exports.isFriend = async (req, res) => {
-    const {token, friendId} = req.body;
+    const { token, friendId } = req.body;
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const userId = decoded.user.id;
 
         const user = await User.findById(userId)
-        if(!user){
-            res.status(404).json({msg: 'user not found'});
+        if (!user) {
+            res.status(404).json({ msg: 'user not found' });
         }
-        
+
         const isFriend = user.friends.includes(friendId);
-        res.status(200).json({isFriend})
-        
+        res.status(200).json({ isFriend })
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

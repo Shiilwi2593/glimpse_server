@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {isFriend,registerUser, login, getUserInfoById,getUserInfoByToken, getUserInfoByUsernameOrEmail, checkEmail, checkUsername, updateLocation, sendOTP, addToFriendList, removeFromFriendList, getFriendList} = require('../controllers/user.controller');
+const {isFriend,registerUser, login, getUserInfoById,getUserInfoByToken,fetchFriendsLocation, getUserInfoByUsernameOrEmail,getOrtherFriendList, checkEmail, checkUsername, updateLocation, sendOTP, addToFriendList, removeFromFriendList, getFriendList} = require('../controllers/user.controller');
 
 router.post('/register', registerUser);
 router.post('/login', login);
@@ -11,9 +11,11 @@ router.post('/addToFriendList', addToFriendList)
 router.post('/isFriend', isFriend)
 
 router.get('/getUserInfoByToken/:token', getUserInfoByToken);
-router.get('/getFriendList', getFriendList)
+router.get('/getFriendList', getFriendList);
+router.get('/getOrtherFriendList',getOrtherFriendList);
 router.get('/getUserInfoById', getUserInfoById);
-router.get('/getUserInfoByUsernameOrEmail', getUserInfoByUsernameOrEmail)
+router.get('/getUserInfoByUsernameOrEmail', getUserInfoByUsernameOrEmail);
+router.get('/fetchFriendsLocation', fetchFriendsLocation);
 
 
 // Updated route for updating location
