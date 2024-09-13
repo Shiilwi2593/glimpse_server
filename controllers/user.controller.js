@@ -210,20 +210,21 @@ exports.fetchFriendsLocation = async (req, res) => {
 
         // Tìm người dùng và lấy danh sách bạn bè cùng với thông tin vị trí
         const user = await User.findById(userId).populate({
-            path: 'friends', 
-            select: '_id location.latitude location.longitude location.updateAt'
+            path: 'friends',
+            select: '_id location.latitude location.longitude location.updateAt username image' // Thêm username và image vào select
         });
 
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Lấy danh sách bạn bè và chỉ trả về thông tin vị trí
         const friendsLocation = user.friends.map(friend => ({
             _id: friend._id,
             latitude: friend.location.latitude,
             longitude: friend.location.longitude,
-            updateAt: friend.location.updateAt
+            updateAt: friend.location.updateAt,
+            username: friend.username,
+            image: friend.image 
         }));
 
         res.status(200).json({ friends: friendsLocation });
@@ -233,6 +234,7 @@ exports.fetchFriendsLocation = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
 
 
 exports.sendOTP = async (req, res) => {
