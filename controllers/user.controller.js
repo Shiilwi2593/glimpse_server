@@ -372,9 +372,9 @@ exports.isMe = async (req, res) => {
         const userId = decoded.user.id;
 
         if (userId === id) {
-            return res.status(200).json(true);
+            return res.status(200).json({success: true});
         } else {
-            return res.status(401).json(false);
+            return res.status(401).json({success: false});
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
