@@ -362,3 +362,21 @@ exports.isFriend = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+
+exports.isMe = async (req, res) => {
+    const { token, id } = req.body;
+    
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id;
+
+        if (userId === id) {
+            return res.status(200).json(true);
+        } else {
+            return res.status(401).json(false);
+        }
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
