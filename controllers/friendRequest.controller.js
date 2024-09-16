@@ -39,8 +39,8 @@ exports.getFriendRequest = async (req, res) => {
 
         const friendRequests = await FriendRequest.find({
             receiverId: userId
-        }).populate('senderId', 'email username')
-            .populate('receiverId', 'email username')
+        }).populate('senderId', '_id email username image')
+            .populate('receiverId', '_id email username image')
 
 
         res.status(200).json({ friendRequests });
@@ -90,11 +90,11 @@ exports.removeFriendRequestOnUsers = async (req, res) => {
     const{token, id2} = req.body;
     try {
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        const id1 = decoded.user.id
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user1 = decoded.user.id
 
         const friendRequest = await FriendRequest.findOneAndDelete({
-            senderId: id1,
+            senderId: user1,
             receiverId: id2
         });
 
