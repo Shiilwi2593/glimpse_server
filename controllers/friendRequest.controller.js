@@ -86,5 +86,22 @@ exports.deleteFriendRequest = async (req, res) => {
     }
 };
 
+exports.removeFriendRequestOnUsers = async (req, res) => {
+    const{id1, id2} = req.body;
+    try {
+        const friendRequest = await FriendRequest.findOneAndDelete({
+            senderId: id1,
+            receiverId: id2
+        });
 
+        if (!friendRequest) {
+            return res.status(404).json({ success: false, message: 'Friend request not found' });
+        }
+
+        res.status(200).json({success: true});
+
+    } catch (error) {
+        res.status(500).json({message: error.message});   
+    }
+}
 
