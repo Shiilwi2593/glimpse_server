@@ -109,3 +109,20 @@ exports.removeFriendRequestOnUsers = async (req, res) => {
     }
 }
 
+exports.isReceiving = async (req, res) => {
+    const{token, receiverId} = req.body;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id
+        
+        if (userId === receiverId){
+            res.status(200).json({success: true})
+        }
+        else{
+            res.status(400).json({success: false});
+        }
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
