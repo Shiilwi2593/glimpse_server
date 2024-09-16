@@ -87,8 +87,12 @@ exports.deleteFriendRequest = async (req, res) => {
 };
 
 exports.removeFriendRequestOnUsers = async (req, res) => {
-    const{id1, id2} = req.body;
+    const{token, id2} = req.body;
     try {
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        const id1 = decoded.user.id
+
         const friendRequest = await FriendRequest.findOneAndDelete({
             senderId: id1,
             receiverId: id2
