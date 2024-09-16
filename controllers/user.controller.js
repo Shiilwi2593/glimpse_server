@@ -308,7 +308,7 @@ exports.removeFromFriendList = async (req, res) => {
 
         //remove my acc from friend list
         friend.friends.pop(userID);
-        await user.save();
+        await friend.save();
 
         res.status(200).json({ success: true, message: 'Friend removed' });
     } catch (error) {
