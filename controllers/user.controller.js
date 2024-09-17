@@ -5,7 +5,6 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { error } = require('console');
 const { json } = require('express');
-const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
 
 
