@@ -5,6 +5,8 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const { error } = require('console');
 const { json } = require('express');
+const cloudinary = require('cloudinary').v2;
+const streamifier = require('streamifier');
 
 
 
@@ -378,5 +380,32 @@ exports.isMe = async (req, res) => {
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
+    }
+};
+
+exports.updateImage = async (req, res) => {
+    const { token, imageUrl } = req.body;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id;
+        console.log('User ID from token:', userId);
+
+        // Find and update the user
+        const user = await User.findByIdAndUpdate(
+            userId, 
+            { $set: { image: imageUrl, updatedAt: Date.now() } }, 
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            console.log('No user found with ID:', userId);
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ user });
+    } catch (error) {
+        console.error('Error updating image:', error);
+        res.status(500).json({ message: 'Server error', error });
     }
 };
