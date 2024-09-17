@@ -50,4 +50,3 @@ mongoose.connect("mongodb+srv://graylwi2593:Gray2592003@glimpse.cl9pe.mongodb.ne
 app.use('/api/users', userRoutes);
 app.use('/api/friend', friendRequestRoutes);
 
-//this is new
