@@ -1,7 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-
 const {registerUser,updateImage, login, getUserInfoById, getUserInfoByToken, fetchFriendsLocation, getUserInfoByUsernameOrEmail, getOrtherFriendList, checkEmail, checkUsername, updateLocation, sendOTP, addToFriendList, removeFromFriendList, getFriendList, isFriend, isMe } = require('../controllers/user.controller');
 
 router.post('/register', registerUser);
