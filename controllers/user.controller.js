@@ -62,12 +62,14 @@ exports.login = async (req, res) => {
             }
         };
 
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' })
-        res.status(200).json({ token })
+        // Tạo token không có thời hạn hết hạn
+        const token = jwt.sign(payload, process.env.JWT_SECRET);
+        res.status(200).json({ token });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 }
+
 
 exports.getUserInfoByToken = async (req, res) => {
     const token = req.params.token;
