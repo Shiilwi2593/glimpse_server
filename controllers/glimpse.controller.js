@@ -35,7 +35,7 @@ exports.getUserGlimpse = async(req, res) => {
         if(!glimpse){
             return res.status(404).json({ message: 'Glimpse not found' });
         }
-        res.status(200).json({glimpse});
+        res.status(200).json(glimpse);
 
     } catch (error) {
         res.status(500).json({message: error.message})
