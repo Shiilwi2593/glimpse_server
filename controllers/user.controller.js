@@ -469,18 +469,15 @@ exports.resetPassword = async (req, res) => {
     }
 
     try {
-        // Tìm người dùng theo email
         const user = await User.findOne({ email });
 
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        // Hash mật khẩu mới
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // Cập nhật mật khẩu mới
         user.password = hashedPassword;
         await user.save();
 
