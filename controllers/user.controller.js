@@ -410,3 +410,84 @@ exports.updateImage = async (req, res) => {
         res.status(500).json({ message: 'Server error', error });
     }
 };
+
+exports.changePassword = async (req, res) => {
+    const {token, oldPassword, newPassword} = req.body;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id
+
+        const user = await User.findById(userId);
+        if(!user){
+            return res.status(401).json({message: 'user not found'});
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if(!isMatch){
+            return res.status(400).json({message: 'incorrect current password'})
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        await user.save();
+        res.status(200).json({success: true, message: {oldPassword, newPassword}});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
+}
+
+exports.changeUsername = async (req, res) => {
+    const { token, newUsername } = req.body;
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id;
+
+        const existingUser = await User.findOne({ username: newUsername });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Username already exists' });
+        }
+
+        const user = await User.findByIdAndUpdate(userId, { $set: { username: newUsername, updatedAt: Date.now() } }, { new: true });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    if (!email || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Email and new password are required' });
+    }
+
+    try {
+        // Tìm người dùng theo email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Hash mật khẩu mới
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Cập nhật mật khẩu mới
+        user.password = hashedPassword;
+        await user.save();
+
+        res.status(200).json({ success: true, message: 'Password reset successfully' });
+
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        res.status(500).json({ success: false, message: 'Server error occurred' });
+    }
+};
