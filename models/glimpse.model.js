@@ -6,13 +6,13 @@ const GlimpseSchema = new mongoose.Schema({
         ref: 'User',
         require: true
     },
-    image:{
+    image: {
         type: String,
         require: true
     },
-    location:{
-        latitude: {type: Number},
-        longitude: {type: Number},
+    location: {
+        latitude: { type: Number },
+        longitude: { type: Number },
     },
     likes: [{
         type: mongoose.Schema.Types.ObjectId,

@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const {registerUser,updateImage,changePassword,changeUsername,resetPassword, login, getUserInfoById, getUserInfoByToken, fetchFriendsLocation, getUserInfoByUsernameOrEmail, getOrtherFriendList, checkEmail, checkUsername, updateLocation, sendOTP, addToFriendList, removeFromFriendList, getFriendList, isFriend, isMe } = require('../controllers/user.controller');
+const { registerUser, updateImage, changePassword, changeUsername, resetPassword, login, getUserInfoById, getUserInfoByToken, fetchFriendsLocation, getUserInfoByUsernameOrEmail, getOrtherFriendList, checkEmail, checkUsername, updateLocation, sendOTP, addToFriendList, removeFromFriendList, getFriendList, isFriend, isMe } = require('../controllers/user.controller');
 
+//POST
 router.post('/register', registerUser);
 router.post('/login', login);
 router.post('/checkUsername', checkUsername);
@@ -12,6 +13,7 @@ router.post('/isFriend', isFriend);
 router.post('/isMe', isMe);
 router.post('/resetPassword', resetPassword)
 
+//GET
 router.get('/getUserInfoByToken/:token', getUserInfoByToken);
 router.get('/getFriendList', getFriendList);
 router.get('/getOrtherFriendList', getOrtherFriendList);
@@ -19,7 +21,7 @@ router.get('/getUserInfoById', getUserInfoById);
 router.get('/getUserInfoByUsernameOrEmail', getUserInfoByUsernameOrEmail);
 router.get('/fetchFriendsLocation', fetchFriendsLocation);
 
-// Updated route for updating location
+//PUT
 router.put('/updateLocation', updateLocation);
 router.put('/removeFromFriendList', removeFromFriendList);
 router.put('/updateImage', updateImage);

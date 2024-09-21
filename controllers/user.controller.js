@@ -227,7 +227,7 @@ exports.fetchFriendsLocation = async (req, res) => {
             longitude: friend.location.longitude,
             updateAt: friend.location.updateAt,
             username: friend.username,
-            image: friend.image 
+            image: friend.image
         }));
 
         res.status(200).json({ friends: friendsLocation });
@@ -369,15 +369,15 @@ exports.isFriend = async (req, res) => {
 
 exports.isMe = async (req, res) => {
     const { token, id } = req.body;
-    
+
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id;
 
         if (userId === id) {
-            return res.status(200).json({success: true});
+            return res.status(200).json({ success: true });
         } else {
-            return res.status(401).json({success: false});
+            return res.status(401).json({ success: false });
         }
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -394,8 +394,8 @@ exports.updateImage = async (req, res) => {
 
         // Find and update the user
         const user = await User.findByIdAndUpdate(
-            userId, 
-            { $set: { image: imageUrl, updatedAt: Date.now() } }, 
+            userId,
+            { $set: { image: imageUrl, updatedAt: Date.now() } },
             { new: true, runValidators: true }
         );
 
@@ -412,29 +412,29 @@ exports.updateImage = async (req, res) => {
 };
 
 exports.changePassword = async (req, res) => {
-    const {token, oldPassword, newPassword} = req.body;
+    const { token, oldPassword, newPassword } = req.body;
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id
 
         const user = await User.findById(userId);
-        if(!user){
-            return res.status(401).json({message: 'user not found'});
+        if (!user) {
+            return res.status(401).json({ message: 'user not found' });
         }
 
         const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if(!isMatch){
-            return res.status(400).json({message: 'incorrect current password'})
+        if (!isMatch) {
+            return res.status(400).json({ message: 'incorrect current password' })
         }
 
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(newPassword, salt);
 
         await user.save();
-        res.status(200).json({success: true, message: {oldPassword, newPassword}});
+        res.status(200).json({ success: true, message: { oldPassword, newPassword } });
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 

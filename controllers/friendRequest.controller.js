@@ -4,9 +4,6 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-// const { error } = require('console');
-// const { json } = require('express');
-
 exports.sendFriendRequest = async (req, res) => {
     const { token, receiverId } = req.body;
     try {
@@ -51,7 +48,7 @@ exports.getFriendRequest = async (req, res) => {
 };
 
 exports.isPending = async (req, res) => {
-    const {token, receiverId} = req.body
+    const { token, receiverId } = req.body
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id
@@ -60,11 +57,11 @@ exports.isPending = async (req, res) => {
             senderId: userId,
             receiverId: receiverId
         }).populate('senderId', 'email username')
-        .populate('receiverId', 'email username')
-        res.status(200).json({friendRequest});
+            .populate('receiverId', 'email username')
+        res.status(200).json({ friendRequest });
 
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -74,20 +71,20 @@ exports.deleteFriendRequest = async (req, res) => {
     try {
         const friendRequest = await FriendRequest.findById(id)
 
-        if(!friendRequest){
-            return res.status(404).json({message: 'friend request not found'});
+        if (!friendRequest) {
+            return res.status(404).json({ message: 'friend request not found' });
         }
 
         await FriendRequest.findByIdAndDelete(id);
-        return res.status(200).json({message: 'Friend request deleted'});
+        return res.status(200).json({ message: 'Friend request deleted' });
 
     } catch (error) {
-        res.status(500).json({ message: error.message }); 
+        res.status(500).json({ message: error.message });
     }
 };
 
 exports.removeFriendRequestOnUsers = async (req, res) => {
-    const{token, id2} = req.body;
+    const { token, id2 } = req.body;
     try {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -102,27 +99,27 @@ exports.removeFriendRequestOnUsers = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Friend request not found' });
         }
 
-        res.status(200).json({success: true});
+        res.status(200).json({ success: true });
 
     } catch (error) {
-        res.status(500).json({message: error.message});   
+        res.status(500).json({ message: error.message });
     }
 }
 
 exports.isReceiving = async (req, res) => {
-    const{token, receiverId} = req.body;
+    const { token, receiverId } = req.body;
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.user.id
-        
-        if (userId === receiverId){
-            res.status(200).json({success: true})
+
+        if (userId === receiverId) {
+            res.status(200).json({ success: true })
         }
-        else{
-            res.status(400).json({success: false});
+        else {
+            res.status(400).json({ success: false });
         }
     } catch (error) {
-        res.status(500).json({message: error.message});
+        res.status(500).json({ message: error.message });
     }
 }
 

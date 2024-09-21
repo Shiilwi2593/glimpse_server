@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose')
@@ -9,7 +9,6 @@ const glimpseRoutes = require('./routes/glimpse.routes');
 const port = 3000;
 app.use(express.json());
 
-// Route để trả về HTML
 app.get('/', (req, res) => {
     res.send(`
         <!DOCTYPE html>
@@ -46,7 +45,7 @@ mongoose.connect("mongodb+srv://graylwi2593:Gray2592003@glimpse.cl9pe.mongodb.ne
         console.error("Connection to mongoDB failed");
     });
 
-    
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/friend', friendRequestRoutes);
