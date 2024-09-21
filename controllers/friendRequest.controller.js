@@ -47,6 +47,23 @@ exports.getFriendRequest = async (req, res) => {
     }
 };
 
+exports.getRequestId = async (req, res) => {
+    const { senderId, receiverId } = req.body;
+    try {
+        const friendRequest = await FriendRequest.findOne({
+            senderId: senderId,
+            receiverId: receiverId
+        });
+
+        if (friendRequest) {
+            res.status(200).json({ success: true, requestId: friendRequest._id });
+        } else {
+            res.status(404).json({ success: false});
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 exports.isPending = async (req, res) => {
     const { token, receiverId } = req.body
     try {
@@ -107,19 +124,25 @@ exports.removeFriendRequestOnUsers = async (req, res) => {
 }
 
 exports.isReceiving = async (req, res) => {
-    const { token, receiverId } = req.body;
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decoded.user.id
+        const { token, senderId } = req.body;
 
-        if (userId === receiverId) {
-            res.status(200).json({ success: true })
-        }
-        else {
-            res.status(400).json({ success: false });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.user.id;
+
+        const friendRequest = await FriendRequest.findOne({
+            senderId: senderId,
+            receiverId: userId
+        });
+
+        if (friendRequest) {
+            return res.status(200).json({ success: true, message: 'Friend request found' });
+        } else {
+            return res.status(404).json({ success: false, message: 'Friend request not found' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
-}
+};
+
 
